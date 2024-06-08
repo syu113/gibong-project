@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gibong.web.dao.VolunDao">
+
+<resultMap type="com.gibong.web.model.Volun" id="volunResultMap">
+		<id column="VOLUN_SEQ" property="volunSeq" />		
+		<result column="USER_ID" property="userId" />
+		<result column="VOLUN_TITLE" property="volunTitle" />
+		<result column="VOLUN_CONTENT" property="volunContent" />
+		<result column="VOLUN_FLAG" property="volunFlag" />
+		<result column="REGDATE" property="regdate" />
+		<result column="VOLUN_TARGET" property="volunTarget" />
+		<result column="VOLUN_PLACE" property="volunPlace" />
+		<result column="VOLUN_TYPE" property="volunType" />
+		<result column="VOLUN_PEOPLE" property="volunPeople" />
+		<result column="END_DATE" property="endDate" />
+		<result column="VOLUN_TIME" property="volunTime" />
+		<result column="USER_NAME" property="userName" />
+		<result column="USER_EMAIL" property="userEmail" />
+		<result column="USER_PHONE" property="userPhone" />
+	</resultMap>
+
+<select id="volunList" parameterType="com.gibong.web.model.Volun" resultMap="volunResultMap">
+	    SELECT VOLUN_SEQ,
+		       USER_ID,
+		       VOLUN_TITLE,
+		       VOLUN_CONTENT,
+		       VOLUN_FLAG,
+		       REGDATE,
+		       VOLUN_TARGET,
+		       VOLUN_PLACE,
+		       VOLUN_TYPE,
+		       VOLUN_PEOPLE,
+		       END_DATE,
+		       VOLUN_TIME,
+		       USER_NAME,
+		       USER_EMAIL,
+		       USER_PHONE
+		  FROM (SELECT  ROWNUM RNUM,
+		                VOLUN_SEQ,
+		                USER_ID,
+		                VOLUN_TITLE,
+		                VOLUN_CONTENT,
+		                VOLUN_FLAG,
+		                REGDATE,
+		                VOLUN_TARGET,
+		                VOLUN_PLACE,
+		                VOLUN_TYPE,
+		                VOLUN_PEOPLE,
+		                END_DATE,
+		                VOLUN_TIME,
+		                USER_NAME,
+		                USER_EMAIL,
+		                USER_PHONE
+		          FROM (SELECT A.VOLUN_SEQ,
+		                        NVL(B.USER_ID, '') USER_ID,
+		                        NVL(A.VOLUN_TITLE, '') VOLUN_TITLE,
+		                        NVL(A.VOLUN_CONTENT, '') VOLUN_CONTENT,
+		                        NVL(A.VOLUN_FLAG, '') VOLUN_FLAG,
+		                        NVL(TO_CHAR(A.REGDATE, 'YYYY.MM.DD'), '') REGDATE,
+		                        NVL(A.VOLUN_TARGET, '') VOLUN_TARGET,
+		                        NVL(A.VOLUN_PLACE, '') VOLUN_PLACE,
+		                        NVL(A.VOLUN_TYPE, '') VOLUN_TYPE,
+		                        NVL(A.VOLUN_PEOPLE, 0) VOLUN_PEOPLE,
+		                        NVL(TO_CHAR(A.END_DATE, 'YYYY.MM.DD'), '') END_DATE,
+		                        NVL(A.VOLUN_TIME, 0) VOLUN_TIME,
+		                        NVL(B.USER_NAME, '') USER_NAME,
+		                        NVL(B.USER_EMAIL, '') USER_EMAIL,
+		                        NVL(B.USER_PHONE, '') USER_PHONE
+		                   FROM GIBONG_VOLUN A, GIBONG_USER B
+		                  WHERE A.USER_ID = B.USER_ID
+		                  ORDER BY A.VOLUN_SEQ DESC))
+		 WHERE RNUM <![CDATA[>=]]> 1
+		   AND RNUM <![CDATA[<=]]> 4
+	</select>
+
+<select id="volunListCount" parameterType="com.gibong.web.model.Volun"  resultType="long">
+			SELECT COUNT(A.VOLUN_SEQ) CNT
+			  FROM GIBONG_VOLUN A, GIBONG_USER B
+			 WHERE A.USER_ID = B.USER_ID
+</select>
+
+</mapper>

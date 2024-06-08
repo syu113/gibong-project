@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gibong.web.dao.DonateDao">
+	<resultMap id="donateResultMap" type="com.gibong.web.model.Donate">
+		<id column="DONATE_SEQ" property="donateSeq" />		
+			<result column="USER_ID" property="userId" />
+			<result column="DONATE_FLAG" property="donateFlag" />
+			<result column="DONATE_TITLE" property="donateTitle" />
+			<result column="DONATE_CONTENT" property="donateContent" />
+			<result column="REGDATE" property="regdate" />
+			<result column="DONATE_NOW_AMT" property="donateNowAmt" />
+			<result column="DONATE_GOAL_AMT" property="donateGoalAmt" />
+			<result column="FINISH_FLAG" property="finishFlag" />
+			<result column="CLOSE_DATE" property="closeDate" />
+			<result column="PROGRESS" property="progress" />
+			<result column="FILE_NAME" property="fileName" />
+			<result column="FILE_ORG_NAME" property="fileOrgName" />
+	</resultMap>
+	
+	<select id="donateList" parameterType="com.gibong.web.model.Donate" resultMap="donateResultMap">
+	
+		SELECT DONATE_SEQ,
+		       USER_ID,
+		       DONATE_FLAG,
+		       DONATE_TITLE,
+		       DONATE_CONTENT,
+		       REGDATE, 
+		       DONATE_NOW_AMT,
+		       DONATE_GOAL_AMT,
+		       FINISH_FLAG,
+		       CLOSE_DATE,
+		       PROGRESS,
+		       FILE_NAME,
+		       FILE_ORG_NAME
+		  FROM(SELECT ROWNUM RNUM,
+		               DONATE_SEQ,
+		               USER_ID,
+		               DONATE_FLAG,
+		               DONATE_TITLE,
+		               DONATE_CONTENT,
+		               REGDATE, 
+		               DONATE_NOW_AMT,
+		               DONATE_GOAL_AMT,
+		               FINISH_FLAG,
+		               CLOSE_DATE,
+		               PROGRESS,
+		               FILE_NAME,
+		               FILE_ORG_NAME
+		          FROM(SELECT A.DONATE_SEQ,
+		                      NVL(A.USER_ID, '') USER_ID,
+		                      NVL(A.DONATE_FLAG, '') DONATE_FLAG,
+		                      NVL(A.DONATE_TITLE, '') DONATE_TITLE,
+		                      NVL(A.DONATE_CONTENT, '') DONATE_CONTENT,
+		                      NVL(TO_CHAR(A.REGDATE, 'MM.DD'), '') REGDATE, 
+		                      NVL(A.DONATE_NOW_AMT, 0) DONATE_NOW_AMT,
+		                      NVL(A.DONATE_GOAL_AMT, 0) DONATE_GOAL_AMT,
+		                      NVL(A.FINISH_FLAG, 'N') FINISH_FLAG,
+		                      NVL(TO_CHAR(A.CLOSE_DATE, 'MM.DD'), '') CLOSE_DATE,
+		                      NVL(A.PROGRESS, 0) PROGRESS,
+		                      NVL(B.FILE_NAME, '') FILE_NAME,
+                              NVL(B.FILE_ORG_NAME, '') FILE_ORG_NAME
+		                 FROM GIBONG_DONATE A, GIBONG_DONATE_FILE B
+		                WHERE A.DONATE_SEQ = B.DONATE_SEQ(+)
+		                ORDER BY DONATE_SEQ DESC))
+		 WHERE RNUM <![CDATA[>=]]> #{startRow}
+		   AND RNUM <![CDATA[<=]]> #{endRow}
+	</select>
+	
+	<select id="donateTotalCount" parameterType="com.gibong.web.model.Donate" resultType="long">
+		SELECT COUNT(DONATE_SEQ) 
+  		  FROM GIBONG_DONATE
+	
+	</select>
+	
+	<insert id="donateInsert" parameterType="com.gibong.web.model.Donate" >
+	<selectKey resultType="long" keyProperty="donateSeq" order="BEFORE" >
+	  		SELECT SEQ_DONATE_SEQ.NEXTVAL FROM DUAL
+	  	</selectKey>
+	
+		INSERT INTO GIBONG_DONATE (
+			    DONATE_SEQ,
+			    USER_ID,
+			    DONATE_FLAG,
+			    DONATE_TITLE,
+			    DONATE_CONTENT,
+			    REGDATE,
+			    DONATE_NOW_AMT,
+			    DONATE_GOAL_AMT,
+			    FINISH_FLAG,
+			    CLOSE_DATE,
+			    PROGRESS
+			) VALUES (
+			    #{donateSeq},
+			    #{userId},
+			    #{donateFlag},
+			    #{donateTitle},
+			    #{donateContent},
+			    SYSDATE,
+			    #{donateNowAmt},
+			    #{donateGoalAmt},
+			    'N',
+			    #{closeDate},
+			    ''
+			)
+	
+	</insert>
+	
+	<!-- 첨부파일등록 -->
+	<insert id="donateFileInsert" parameterType="com.gibong.web.model.DonateFile">
+	INSERT INTO gibong_donate_file (
+        donate_seq,
+        file_seq,
+        file_org_name,
+        file_name,
+        file_ext,
+        file_size,
+        regdate
+    ) VALUES (
+        #{donateSeq},
+        #{fileSeq},
+        #{fileOrgName},
+        #{fileName},
+        #{fileExt},
+        #{fileSize},
+        SYSDATE
+    )
+	
+	</insert>
+	
+	<select id="donateViewSelect" parameterType="long" resultMap="donateResultMap">
+			SELECT A.DONATE_SEQ,
+                   NVL(A.USER_ID, '') USER_ID,
+                   NVL(A.DONATE_FLAG, '') DONATE_FLAG,
+                   NVL(A.DONATE_TITLE, '') DONATE_TITLE,
+                   NVL(A.DONATE_CONTENT, '') DONATE_CONTENT,
+                   NVL(TO_CHAR(A.REGDATE, 'MM.DD'), '') REGDATE, 
+                   NVL(A.DONATE_NOW_AMT, 0) DONATE_NOW_AMT,
+                   NVL(A.DONATE_GOAL_AMT, 0) DONATE_GOAL_AMT,
+                   NVL(A.FINISH_FLAG, 'N') FINISH_FLAG,
+                   NVL(TO_CHAR(A.CLOSE_DATE, 'MM.DD'), '') CLOSE_DATE,
+                   NVL(A.PROGRESS, 0) PROGRESS,
+                   NVL(B.FILE_NAME, '') FILE_NAME,
+                   NVL(B.FILE_ORG_NAME, '') FILE_ORG_NAME
+              FROM GIBONG_DONATE A, GIBONG_DONATE_FILE B
+             WHERE A.DONATE_SEQ = B.DONATE_SEQ(+)
+               AND A.DONATE_SEQ = #{value}
+	
+	
+	</select>
+	
+	<update id="donatePayment" parameterType="com.gibong.web.model.Donate">
+		UPDATE GIBONG_DONATE
+		   SET DONATE_NOW_AMT = #{donateNowAmt}
+		 WHERE DONATE_SEQ = #{donateSeq}
+	</update>
+</mapper>
